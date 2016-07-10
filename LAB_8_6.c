@@ -27,6 +27,10 @@ int main (void) {
   int rcdata[26];
   
 //3. Use SysCtlPeripheralEnable() to enable clock and GPIO Port B
+SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB | SYSCTL_PERIPJ_GPIOF);
+SysCtlPeripheralEnable(UART1);
+
+
   
   
 }
