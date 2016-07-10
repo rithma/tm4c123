@@ -20,19 +20,19 @@ built up around Lab 8.6 in Ying Bai's book 'Practical Engineering with ARM techn
 #define INT_UART1         22
 
 void UARTIntHandler(void);
-char rdata[26];
-uint8_t rnum = 0;
-bool intFlag = true;
+char     rdata[26];
+uint8_t  rnum = 0;
+bool     intFlag = true;
 
 int main (void) {
-  char s_data;
-  int	 rcdata[26];
+  char   s_data;
+  int	   rcdata[26];
 
-SysCtlPeripheralEnable   (SYSCTL_PERIPH_GPIOB | SYSCTL_PERIPH_GPIOF);
-SysCtlPeripheralEnable   (SYSCTL_PERIPH_UART1);
-GPIOPinTypeGPIOOutput    (GPIO_PORTF_BASE, GPIO_PIN_1);
-GPIOPinTypeUART          (GPIO_PORTB_BASE, GPIO_PIN_1 | GPIO_PIN_0);
-GPIOPinConfigure         (GPIO_PB1_U1TX | GPIO_PB0_U1RX);
+SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB | SYSCTL_PERIPH_GPIOF);
+SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
+GPIOPinTypeGPIOOutput	(GPIO_PORTF_BASE, GPIO_PIN_1);
+GPIOPinTypeUART				(GPIO_PORTB_BASE, GPIO_PIN_1 | GPIO_PIN_0);
+GPIOPinConfigure			(GPIO_PB1_U1TX | GPIO_PB0_U1RX);
 
   
 }
