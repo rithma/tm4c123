@@ -2,23 +2,11 @@
 //
 // temperature_sensor.c - Example demonstrating the internal ADC temperature
 //                        sensor.
-//
 // Copyright (c) 2010-2014 Texas Instruments Incorporated.  All rights reserved.
-
-// This is part of revision 2.1.0.12573 of the Tiva Firmware Development Package.
-//
+// This is retextured by Rithma , was part of revision 2.1.0.12573 of the Tiva Firmware Development Package.
+// Math mods on temps done by Luis Alfonso.
 //*****************************************************************************
-/*
- * 	This code was made to show a simple ADC read.
- *
- * 	It was made from the example provided by TivaWare but it was a some modifications
- * like the math
- *
- *
- * Luís Afonso
- *
- *
- */
+
 
 
 #define PART_TM4C123GH6PM
@@ -67,13 +55,10 @@ void Wait(uint32_t time){
 	while( (millis-temp) < time){
 	}	
 }
-
 //*****************************************************************************
-//
 // This function sets up UART0 to be used for a console to display information
 // as the example is running.
-//
-//*****************************************************************************
+
 void
 InitConsole(void)
 {
@@ -141,20 +126,11 @@ int main(){
 	    ADCIntClear(ADC0_BASE, 3);          // Clear the interrupt status flag.
 	    while(1)                            // Sample the temperature sensor forever.  Display the value on the
 	    {
-	        //
-	        // Trigger the ADC conversion.
-	        //
-	        ADCProcessorTrigger(ADC0_BASE, 3);
+	        ADCProcessorTrigger(ADC0_BASE, 3);   // Trigger the ADC conversion.
+	        while(!ADCIntStatus(ADC0_BASE, 3, false)) {}   // Wait for conversion to be completed.
 
-	        //
-	        // Wait for conversion to be completed.
-	        //
-	        while(!ADCIntStatus(ADC0_BASE, 3, false))
-	        {
-	        }
 	        ADCIntClear(ADC0_BASE, 3);                                      // Clear the ADC interrupt flag.
 	        ADCSequenceDataGet(ADC0_BASE, 3, ADCValues);                    // Read ADC Value.
-
 	        //
 	        // Use non-calibrated conversion provided in the data sheet. I use floats in intermediate
 	        // math but you could use intergers with multiplied by powers of 10 and divide on the end
