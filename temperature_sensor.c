@@ -77,25 +77,25 @@ void Wait(uint32_t time){
 void
 InitConsole(void)
 {
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);     //select UART GPIO bank
-    GPIOPinConfigure(GPIO_PA0_U0RX);                 //configures pin mux
-    GPIOPinConfigure(GPIO_PA1_U0TX);                 //configures pin mux
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);    //enable UART0 to config clock
-    UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);//uses 16000000 clock for uart clock
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);                 //select UART GPIO bank
+    GPIOPinConfigure(GPIO_PA0_U0RX);                             //configures pin mux
+    GPIOPinConfigure(GPIO_PA1_U0TX);                             //configures pin mux
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);                 //enable UART0 to config clock
+    UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);            //uses 16000000 clock for uart clock
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);   //uart pins
-    UARTStdioConfig(0, 115200, 16000000);           //initialize uart for condole i/o
+    UARTStdioConfig(0, 115200, 16000000);                        //initialize uart for condole i/o
 }
 
 int main(){
 		uint32_t ADCValues[1];
 		uint32_t TempValueC;
 		uint32_t TempValueF;
-
-
+		uint32_t clockSpeed = 0;
 
 	  SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
 	  SysTickbegin();
 	  InitConsole();
+	  clockSpeed = SysCtlClockGet();
 	    //
 	    // This array is used for storing the data read from the ADC FIFO. It
 	    // must be as large as the FIFO for the sequencer in use.  This example
@@ -103,7 +103,9 @@ int main(){
 	    // was used with a deeper FIFO, then the array size must be changed.
 	    //
 
-	    UARTprintf("ADC ->\n");
+	    UARTprintf("ADC and SysStats->\n");
+	    UARTprintf("System Clock Speed:  %d\n", clockSpeed)
+	    UARTprintf("System Clock Speed:  %x\n", &clockSpeed)
 	    UARTprintf("  Type: Internal Temperature Sensor\n");
 	    UARTprintf("  Samples: One\n");
 	    UARTprintf("  Update Rate: 250ms\n");
@@ -132,25 +134,12 @@ int main(){
 	    ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_TS | ADC_CTL_IE |
 	                             ADC_CTL_END);
 
-
+ 
 	    //ADCHardwareOversampleConfigure(ADC0_BASE,64);
 
-	    //
-	    // Since sample sequence 3 is now configured, it must be enabled.
-	    //
-	    ADCSequenceEnable(ADC0_BASE, 3);
-
-	    //
-	    // Clear the interrupt status flag.  This is done to make sure the
-	    // interrupt flag is cleared before we sample.
-	    //
-	    ADCIntClear(ADC0_BASE, 3);
-
-	    //
-	    // Sample the temperature sensor forever.  Display the value on the
-	    // console.
-	    //
-	    while(1)
+	    ADCSequenceEnable(ADC0_BASE, 3);    // Since sample sequence 3 is now configured, it must be enabled.
+	    ADCIntClear(ADC0_BASE, 3);          // Clear the interrupt status flag.
+	    while(1)                            // Sample the temperature sensor forever.  Display the value on the
 	    {
 	        //
 	        // Trigger the ADC conversion.
@@ -163,16 +152,8 @@ int main(){
 	        while(!ADCIntStatus(ADC0_BASE, 3, false))
 	        {
 	        }
-
-	        //
-	        // Clear the ADC interrupt flag.
-	        //
-	        ADCIntClear(ADC0_BASE, 3);
-
-	        //
-	        // Read ADC Value.
-	        //
-	        ADCSequenceDataGet(ADC0_BASE, 3, ADCValues);
+	        ADCIntClear(ADC0_BASE, 3);                                      // Clear the ADC interrupt flag.
+	        ADCSequenceDataGet(ADC0_BASE, 3, ADCValues);                    // Read ADC Value.
 
 	        //
 	        // Use non-calibrated conversion provided in the data sheet. I use floats in intermediate
@@ -180,16 +161,8 @@ int main(){
 	        // Make sure you divide last to avoid dropout.
 	        //
 	        TempValueC = (uint32_t)(147.5 - ((75.0*3.3 *(float)ADCValues[0])) / 4096.0);
-
-	        //
-	        // Get Fahrenheit value.  Make sure you divide last to avoid dropout.
-	        //
-	        TempValueF = ((TempValueC * 9) + 160) / 5;
-
-	        //
-	        // Display the temperature value on the console.
-	        //
-	        UARTprintf("Temperature = %3d*C or %3d*F\r", TempValueC,
+	        TempValueF = ((TempValueC * 9) + 160) / 5;                      // Get Fahrenheit value.  Make sure you divide last to avoid dropout.
+	        UARTprintf("Temperature = %3d*C or %3d*F\r", TempValueC,        //display temp vals
 	        		TempValueF);
 
 	        //
